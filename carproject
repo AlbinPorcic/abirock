@@ -1,0 +1,255 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <vector>
+#include <map>
+using namespace std;
+#define NULL 0
+#define NULA NULL
+typedef struct Automobil{
+    string Model;
+    string Boja;
+    string Snaga;
+    string Gorivo;
+    string BrojVrata;
+    Automobil *sljedeci;
+};
+typedef bool (*PretraziFunkcija)(Automobil *cvor, string Model, string Boja, string Snaga,string Gorivo,string BrojVrata);
+class Lista{
+    private:
+    Automobil *glava;
+    Automobil *novi_cvor(){
+        return new Automobil();
+    }
+    bool prazna_lista(){
+        return glava==NULA;
+    }
+    public:
+    Lista(){
+        glava=NULA;
+    }
+    ~Lista(){
+        if(prazna_lista())
+            return;
+        Automobil *tmp=glava;
+        do{
+            Automobil *tmp1=tmp;
+            delete tmp1;
+        }while((tmp=tmp->sljedeci)!=NULA);
+    }
+    void Dodaj(string Model, string Boja, string Snaga,string Gorivo,string BrojVrata){
+        Automobil * novi = novi_cvor();
+        novi->Model=Model;
+        novi->Boja=Boja;
+        novi->Snaga=Snaga;
+        novi->Gorivo=Gorivo;
+        novi->BrojVrata=BrojVrata;
+        novi->sljedeci=NULA;
+        if(prazna_lista()){
+            glava=novi;
+        }else{
+            Automobil *tmp=glava;
+            while(tmp->sljedeci!=NULA)
+                tmp=tmp->sljedeci;
+            tmp->sljedeci=novi;
+        }
+    }
+    void IspisListe(){
+        if(prazna_lista())
+            return;
+        Automobil *tmp=glava;
+        do{
+            IspisiCvor(tmp);
+        }while((tmp=tmp->sljedeci)!=NULA);
+    }
+    void IspisiCvor(Automobil *cvor){
+            cout<< " Model : "<<cvor->Model<<"\n Boja:  "<< cvor->Boja<<"\n Snaga:  "<< cvor->Snaga<<"\n Gorivo: "<<cvor->Gorivo<<" \n Broj vrata: "<<cvor->BrojVrata<<endl;
+    }
+    Automobil *Pretrazi(PretraziFunkcija pfunkcija,string Model, string Boja, string Snaga,string Gorivo,string BrojVrata){
+        if(prazna_lista())
+            return NULA;
+        Automobil *tmp=glava;
+        do{
+            if(pfunkcija(tmp,Model,Boja,Snaga,Gorivo,BrojVrata))
+                return tmp;
+        }while((tmp=tmp->sljedeci)!=NULA);
+        return NULA;
+    }
+    void Obrisi(Automobil *cvor){
+        if(prazna_lista())
+            return;
+        Automobil *tmp=glava;
+        if(glava==cvor){
+            tmp=tmp->sljedeci;
+            delete glava;
+            glava=tmp;
+        }else{
+            while(tmp!=NULA){
+                if(tmp->sljedeci==cvor){
+                Automobil *tmp1=tmp->sljedeci;
+                    if(tmp1->sljedeci!=NULA)
+                        tmp->sljedeci=tmp1->sljedeci;
+                    else
+                        tmp->sljedeci=NULA;
+                    delete tmp1;
+                    return;
+                }else
+                    tmp=tmp->sljedeci;
+            };
+        }
+    }
+};
+Lista lista1;
+bool PretragaPoModelu(Automobil *cvor, string Model, string Boja, string Snaga,string Gorivo,string BrojVrata){
+    return cvor->Model.find(Model)!=string::npos;
+}
+bool PretragaPoBoji(Automobil *cvor, string Model, string Boja, string Snaga,string Gorivo,string BrojVrata){
+    return cvor->Boja.find(Boja)!=string::npos;
+}
+bool PretragaSnaga(Automobil *cvor, string Model, string Boja, string Snaga,string Gorivo,string BrojVrata){
+    return cvor->Snaga==Snaga;
+}
+bool PretragaGorivo(Automobil *cvor, string Model, string Boja, string Snaga,string Gorivo,string BrojVrata){
+    return cvor->Gorivo==Gorivo;
+}
+bool PretragaBrojVrata(Automobil *cvor, string Model, string Boja, string Snaga,string Gorivo,string BrojVrata){
+    return cvor->BrojVrata==BrojVrata;
+}
+typedef void (*funkcija1)();
+typedef struct StavkeMenija{
+    string Naziv;
+    char AktivacijskiZnak;
+    funkcija1 Izvrsi;
+    };
+int broj_menija=0;
+class Menij{
+private:
+    vector<StavkeMenija>stavke;
+    void IspisMenij(){
+         system("CLS");
+        cout<<"Menij: "<<endl;
+        for(int i=0; i<stavke.size(); i++){
+            cout<<" "<<stavke[i].AktivacijskiZnak<<":"<<stavke[i].Naziv<<endl;
+        }
+        cout<<"Za izlaz ili nazad unesite 0."<<endl;
+        }
+public:
+    void DodajStavku(StavkeMenija &sm){
+        stavke.push_back(sm);
+        }
+    void Pokreni(){
+        char znak;
+        do{
+            int broj;
+            IspisMenij();
+            cin>>znak;
+            for(int i=0; i<stavke.size(); i++)
+                if(stavke[i].AktivacijskiZnak==znak)
+                    stavke[i].Izvrsi();
+            }while(znak!='0');
+
+        }
+};
+void Unos(){
+       char Model[256],Boja[256],Snaga[256],Gorivo[256],BrojVrata[256];
+    cout<<"Upisi model automobila:"<<endl;
+    cin.ignore();
+    cin.getline(Model,256);
+    cout<<"Unesi boju automobila:"<<endl;
+    cin.getline(Boja,256);
+    cout<<"Snaga:"<<endl;
+    cin.getline(Snaga,256);
+    cout<<"Gorivo koje automobil koristi:"<<endl;
+    cin.getline(Gorivo,256);
+    cout<<"Unesi broj vrata:"<<endl;
+    cin.getline(BrojVrata,256);
+    lista1.Dodaj(Model,Boja,Snaga,Gorivo,BrojVrata);
+}
+void model(){
+    Automobil *prt;
+    string odaberi;
+    cout<<"Unesite model za pretragu: \n"<<endl;
+    cin>>odaberi;
+             if((prt=lista1.Pretrazi(&PretragaPoModelu,odaberi,"","","",""))!=NULA){
+                lista1.IspisiCvor(prt);
+             }
+            system("pause");
+    }
+void boja(){
+            string odaberi;
+            cout<<"Unesite boju za pretragu: \n"<<endl;
+            cin>>odaberi;
+            if(Automobil *prt=lista1.Pretrazi(&PretragaPoBoji,"",odaberi,"","","")){
+                lista1.IspisiCvor(prt);
+            }
+            system("pause");
+    }
+void snaga(){
+            string odaberi;
+            cout<<"Unesite snagu automobila za pretragu: \n"<<endl;
+            cin >>odaberi;
+            if(Automobil *prt=lista1.Pretrazi(&PretragaSnaga,"","",odaberi,"","")){
+                lista1.IspisiCvor(prt);
+            }
+            system("pause");
+    }
+void gorivo(){
+            string odaberi;
+            cout<<"Unesite gorivo za pretragu: \n"<<endl;
+            cin >>odaberi;
+            if(Automobil *prt=lista1.Pretrazi(&PretragaGorivo,"","","",odaberi,"")){
+                lista1.IspisiCvor(prt);
+            }
+            system("pause");
+    }
+void brojvrata(){
+            string odaberi;
+            cout<<"Unesite broj vrata za pretragu: \n"<<endl;
+            cin >>odaberi;
+            if(Automobil *prt=lista1.Pretrazi(&PretragaBrojVrata,"","","","",odaberi)){
+                lista1.IspisiCvor(prt);
+            }
+            system("pause");
+    }
+void Dodaja(){
+    system("CLS");
+        string Model,Boja,Snaga,Gorivo,BrojVrata;
+        cout<<"Upisi model automobila:"<<endl;
+        cin.ignore();
+        getline(cin,Model);
+        cout<<"Upisi boju automobila:"<<endl;
+        getline(cin,Boja);
+        cout<<"Upisi snagu automobila:"<<endl;
+        getline(cin,Snaga);
+        cout<<"Upisi tip goriva u automobilu:"<<endl;
+        getline(cin,Gorivo);
+        cout<<"Upisi broj vrata automobila:"<<endl;
+        getline(cin,BrojVrata);
+        system("pause");
+        }
+void Ispissve(){
+    system("CLS");
+lista1.IspisListe();
+system("pause");
+}
+int main(){
+    Menij M;
+    StavkeMenija sm7={"Unos",'8',&Unos};
+    StavkeMenija sm={"Pretraga Po Modelu",'1',&model};
+    StavkeMenija sm1={"Pretraga Po Boji",'2',&boja};
+    StavkeMenija sm2={"Pretraga Snaga",'3',&snaga};
+    StavkeMenija sm3={"Pretraga Gorivo",'4',&gorivo};
+    StavkeMenija sm4={"Pretraga Broj Vrata",'5',&brojvrata};
+    StavkeMenija sm5={"Dodaj drugi cvor",'6',&Dodaja};
+    StavkeMenija sm6={"Ispis svega",'7',&Ispissve};
+    M.DodajStavku(sm);
+    M.DodajStavku(sm1);
+    M.DodajStavku(sm2);
+    M.DodajStavku(sm3);
+    M.DodajStavku(sm4);
+    M.DodajStavku(sm5);
+    M.DodajStavku(sm6);
+     M.DodajStavku(sm7);
+    M.Pokreni();
+    return 0;
+}
